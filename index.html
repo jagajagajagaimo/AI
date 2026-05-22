@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>FORTUNE AI</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    min-height:100vh;
+    overflow-x:hidden;
+
+    font-family:'Orbitron',sans-serif;
+
+    background:
+    radial-gradient(circle at top,#08131d,#020617 70%);
+
+    color:#00ff9d;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:40px 0;
+
+    position:relative;
+}
+
+/* 背景 */
+
+.grid{
+
+    position:fixed;
+    inset:0;
+
+    background-image:
+    linear-gradient(rgba(0,255,157,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,157,0.05) 1px, transparent 1px);
+
+    background-size:40px 40px;
+
+    opacity:0.5;
+}
+
+/* 流れ星 */
+
+.star{
+
+    position:fixed;
+
+    width:2px;
+    height:140px;
+
+    background:
+    linear-gradient(to bottom,#00ff9d,transparent);
+
+    opacity:0.7;
+
+    transform:rotate(45deg);
+
+    animation:shoot linear infinite;
+
+    pointer-events:none;
+}
+
+@keyframes shoot{
+
+    from{
+        transform:translate(100vw,-100vh) rotate(45deg);
+    }
+
+    to{
+        transform:translate(-120vw,120vh) rotate(45deg);
+        opacity:0;
+    }
+
+}
+
+/* メイン */
+
+.container{
+
+    width:90%;
+    max-width:620px;
+
+    position:relative;
+    z-index:10;
+
+    padding:35px;
+
+    border-radius:28px;
+
+    background:
+    rgba(8,15,25,0.92);
+
+    border:
+    1px solid rgba(0,255,157,0.15);
+
+    box-shadow:
+    0 0 25px rgba(0,255,157,0.12);
+
+}
+
+/* タイトル */
+
+h1{
+
+    text-align:center;
+
+    font-size:38px;
+
+    letter-spacing:6px;
+
+    margin-bottom:12px;
+
+    text-shadow:
+    0 0 10px #00ff9d;
+
+}
+
+.sub{
+
+    text-align:center;
+
+    opacity:0.7;
+
+    line-height:1.8;
+
+    margin-bottom:28px;
+
+    font-size:14px;
+
+}
+
+/* ラベル */
+
+.label{
+
+    margin-bottom:8px;
+
+    font-size:13px;
+
+    opacity:0.8;
+
+    letter-spacing:1px;
+
+}
+
+/* select */
+
+.select-wrap{
+
+    position:relative;
+
+    margin-bottom:20px;
+
+}
+
+.ai-select{
+
+    width:100%;
+
+    padding:16px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:#09111b;
+
+    color:#00ff9d;
+
+    font-size:15px;
+
+    font-family:'Orbitron',sans-serif;
+
+    outline:none;
+
+    cursor:pointer;
+
+    border:
+    1px solid rgba(0,255,157,0.15);
+
+}
+
+.ai-select option{
+
+    background:#020617;
+    color:#00ff9d;
+}
+
+.select-arrow{
+
+    position:absolute;
+
+    right:18px;
+    top:52px;
+
+    pointer-events:none;
+
+    font-size:12px;
+}
+
+/* ボタン */
+
+button{
+
+    width:100%;
+
+    padding:16px;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #00ff9d,
+        #00d0ff
+    );
+
+    color:#00160d;
+
+    font-weight:bold;
+
+    font-size:15px;
+
+    font-family:'Orbitron',sans-serif;
+
+    cursor:pointer;
+
+    margin-top:10px;
+
+    transition:0.3s;
+}
+
+button:hover{
+
+    transform:scale(1.01);
+}
+
+/* loading */
+
+.loading{
+
+    margin-top:25px;
+
+    text-align:center;
+
+    opacity:0;
+
+    height:0;
+
+    overflow:hidden;
+
+    transition:0.4s;
+
+    position:relative;
+}
+
+.loading.show{
+
+    opacity:1;
+
+    height:180px;
+}
+
+.loading-text{
+
+    margin-top:75px;
+
+    letter-spacing:3px;
+
+    animation:blink 1s infinite;
+}
+
+@keyframes blink{
+
+    50%{
+        opacity:0.5;
+    }
+
+}
+
+/* 解析背景 */
+
+.analysis-bg{
+
+    position:absolute;
+    inset:0;
+
+    overflow:hidden;
+}
+
+.analysis-line{
+
+    position:absolute;
+
+    width:2px;
+    height:100px;
+
+    background:
+    linear-gradient(to bottom,#00ff9d,transparent);
+
+    opacity:0.7;
+
+    transform:rotate(45deg);
+
+    animation:analysisShoot linear infinite;
+}
+
+@keyframes analysisShoot{
+
+    from{
+        transform:translate(100vw,-100vh) rotate(45deg);
+    }
+
+    to{
+        transform:translate(-100vw,100vh) rotate(45deg);
+        opacity:0;
+    }
+
+}
+
+/* result */
+
+.result{
+
+    opacity:0;
+
+    transform:translateY(10px);
+
+    transition:0.6s;
+
+    visibility:hidden;
+
+    height:0;
+
+    overflow:hidden;
+}
+
+.result.show{
+
+    opacity:1;
+
+    transform:translateY(0);
+
+    visibility:visible;
+
+    height:auto;
+
+    margin-top:28px;
+}
+
+.result-box{
+
+    background:#09111b;
+
+    border-radius:22px;
+
+    padding:25px;
+
+    border:
+    1px solid rgba(0,255,157,0.1);
+
+    line-height:2;
+}
+
+.rank{
+
+    text-align:center;
+
+    font-size:42px;
+
+    margin-bottom:18px;
+
+    text-shadow:
+    0 0 15px #00ff9d;
+
+    animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+
+    50%{
+        transform:scale(1.05);
+    }
+
+}
+
+/* QR */
+
+.qr-section{
+
+    margin-top:25px;
+
+    text-align:center;
+
+    padding:18px;
+
+    border-radius:18px;
+
+    background:
+    rgba(0,255,157,0.03);
+
+}
+
+.qr-title{
+
+    margin-bottom:12px;
+
+    font-size:13px;
+
+    letter-spacing:2px;
+}
+
+.qr-sub{
+
+    margin-top:10px;
+
+    opacity:0.7;
+
+    font-size:11px;
+
+    line-height:1.8;
+}
+
+#qrArea canvas{
+
+    border-radius:10px;
+
+    background:white;
+
+    padding:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="grid"></div>
+
+<div class="container">
+
+<h1>FORTUNE AI</h1>
+
+<p class="sub">
+NEURAL ASTRO ANALYSIS SYSTEM<br>
+感情ログと星座データを解析しています
+</p>
+
+<!-- 星座 -->
+
+<div class="select-wrap">
+
+<div class="label">
+星座
+</div>
+
+<select id="zodiac" class="ai-select">
+
+<option value="">選択してください</option>
+
+<option>牡羊座</option>
+<option>牡牛座</option>
+<option>双子座</option>
+<option>蟹座</option>
+<option>獅子座</option>
+<option>乙女座</option>
+<option>天秤座</option>
+<option>蠍座</option>
+<option>射手座</option>
+<option>山羊座</option>
+<option>水瓶座</option>
+<option>魚座</option>
+
+</select>
+
+<div class="select-arrow">▼</div>
+
+</div>
+
+<!-- HP -->
+
+<div class="select-wrap">
+
+<div class="label">
+現在のHPは？
+</div>
+
+<select id="hp" class="ai-select">
+
+<option value="">選択してください</option>
+
+<option>瀕死</option>
+<option>30%</option>
+<option>50%</option>
+<option>70%</option>
+<option>100%</option>
+
+</select>
+
+<div class="select-arrow">▼</div>
+
+</div>
+
+<button onclick="fortune()">
+START AI ANALYSIS
+</button>
+
+<!-- loading -->
+
+<div class="loading" id="loading">
+
+<div class="analysis-bg" id="analysisBg"></div>
+
+<div class="loading-text">
+AI ANALYZING...
+</div>
+
+</div>
+
+<!-- result -->
+
+<div class="result" id="result">
+
+<div class="result-box">
+
+<div class="rank" id="rank"></div>
+
+<div id="resultText"></div>
+
+<div class="qr-section">
+
+<p class="qr-title">
+SCAN & SAVE
+</p>
+
+<div id="qrArea"></div>
+
+<p class="qr-sub">
+SCAN TO SAVE RESULT<br>
+RESULT DATA STORAGE SYSTEM
+</p>
+
+</div>
+
+<button onclick="window.print()">
+PRINT RECEIPT
+</button>
+
+<button onclick="resetFortune()">
+RETURN TO HOME
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+<script>
+
+/* 背景流れ星 */
+
+for(let i=0;i<28;i++){
+
+    const star = document.createElement("div");
+
+    star.classList.add("star");
+
+    star.style.left =
+    Math.random()*100+"vw";
+
+    star.style.top =
+    Math.random()*100+"vh";
+
+    star.style.animationDuration =
+    (Math.random()*4+3)+"s";
+
+    star.style.animationDelay =
+    Math.random()*5+"s";
+
+    document.body.appendChild(star);
+
+}
+
+/* loading背景 */
+
+for(let i=0;i<18;i++){
+
+    const line = document.createElement("div");
+
+    line.classList.add("analysis-line");
+
+    line.style.left =
+    Math.random()*100+"%";
+
+    line.style.top =
+    Math.random()*100+"%";
+
+    line.style.animationDuration =
+    (Math.random()*2+1)+"s";
+
+    line.style.animationDelay =
+    Math.random()*2+"s";
+
+    document.getElementById("analysisBg")
+    .appendChild(line);
+
+}
+
+/* データ */
+
+const fortunes = ["大吉","吉","中吉","小吉","凶"];
+
+const messages = [
+
+"本日の運勢データを解析した結果、あなたの中に眠っている行動力が強く反応しています。今日は少し大胆なくらいの選択が未来を良い方向へ変化させる可能性があります。",
+
+"未来予測システムによると、今日は人との関わりの中に重要なヒントが隠されているようです。何気ない会話でも、意外な気付きが得られるでしょう。",
+
+"現在の感情ログを分析した結果、少し疲労の蓄積が確認されました。無理に頑張りすぎるよりも、今日は心を整える行動が運気上昇へ繋がります。"
+
+];
+
+const loveMessages = [
+
+"恋愛運はゆるやかに上昇しています。今日は自然体でいることで、あなた本来の魅力が相手に伝わりやすくなるでしょう。",
+
+"感情データを解析した結果、焦らない姿勢が恋愛運を安定させています。今は『追う』より『待つ』ことで良い流れが訪れそうです。"
+
+];
+
+const items = [
+
+"ワイヤレスイヤホン",
+"黒いノート",
+"ガラスアクセサリー",
+"ミント系のお菓子"
+
+];
+
+const colors = [
+
+"NEON GREEN",
+"CYBER BLUE",
+"SILVER",
+"BLACK"
+
+];
+
+function randomItem(array){
+
+    return array[
+        Math.floor(Math.random()*array.length)
+    ];
+
+}
+
+/* メイン */
+
+function fortune(){
+
+    const zodiac =
+    document.getElementById("zodiac").value;
+
+    const hp =
+    document.getElementById("hp").value;
+
+    if(zodiac === "" || hp === ""){
+
+        alert("選択してください");
+
+        return;
+    }
+
+    const loading =
+    document.getElementById("loading");
+
+    const result =
+    document.getElementById("result");
+
+    loading.classList.add("show");
+
+    result.classList.remove("show");
+
+    setTimeout(()=>{
+
+        let resultId =
+        "NX-" +
+        Math.floor(Math.random()*999999);
+
+        let rank =
+        randomItem(fortunes);
+
+        document.getElementById("rank")
+        .innerText = rank;
+
+        const text = `
+
+====================<br>
+FORTUNE AI<br>
+====================<br><br>
+
+識別コード : ${resultId}<br><br>
+
+【選択星座】<br>
+${zodiac}<br><br>
+
+【現在HP】<br>
+${hp}<br><br>
+
+【本日の運勢】<br>
+${randomItem(messages)}<br><br>
+
+【恋愛運】<br>
+${randomItem(loveMessages)}<br><br>
+
+【ラッキーアイテム】<br>
+${randomItem(items)}<br><br>
+
+【ラッキーカラー】<br>
+${randomItem(colors)}<br><br>
+
+--------------------<br>
+【AIメッセージ】<br>
+--------------------<br><br>
+
+未来ログを正常に保存しました。<br><br>
+
+Generated by FORTUNE AI
+
+`;
+
+        document.getElementById("resultText")
+        .innerHTML = text;
+
+        /* URL生成 */
+
+        const shareUrl =
+        location.origin +
+        location.pathname +
+        "?rank=" + encodeURIComponent(rank) +
+        "&zodiac=" + encodeURIComponent(zodiac) +
+        "&hp=" + encodeURIComponent(hp);
+
+        generateQR(shareUrl);
+
+        loading.classList.remove("show");
+
+        result.classList.add("show");
+
+    },1200);
+
+}
+
+/* QR */
+
+function generateQR(text){
+
+    const qrArea =
+    document.getElementById("qrArea");
+
+    qrArea.innerHTML = "";
+
+    QRCode.toCanvas(text, {
+
+        width:260,
+
+        margin:4,
+
+        errorCorrectionLevel:'M',
+
+        color:{
+            dark:"#000000",
+            light:"#ffffff"
+        }
+
+    }, function(error, canvas){
+
+        if(error){
+
+            console.error(error);
+
+            return;
+        }
+
+        qrArea.appendChild(canvas);
+
+    });
+
+}
+
+/* URL読み込み */
+
+window.onload = () => {
+
+    const params =
+    new URLSearchParams(window.location.search);
+
+    const rank =
+    params.get("rank");
+
+    const zodiac =
+    params.get("zodiac");
+
+    const hp =
+    params.get("hp");
+
+    if(rank){
+
+        document.getElementById("rank")
+        .innerText = rank;
+
+        document.getElementById("result")
+        .classList.add("show");
+
+        document.getElementById("resultText")
+        .innerHTML = `
+
+====================<br>
+FORTUNE AI<br>
+====================<br><br>
+
+【選択星座】<br>
+${zodiac}<br><br>
+
+【現在HP】<br>
+${hp}<br><br>
+
+【本日の運勢】<br>
+${rank}<br><br>
+
+SCAN SUCCESS...<br><br>
+
+RESULT DATA RESTORED
+
+`;
+
+    }
+
+};
+
+/* リセット */
+
+function resetFortune(){
+
+    location.href =
+    location.origin +
+    location.pathname;
+
+}
+
+</script>
+
+</body>
+</html>
